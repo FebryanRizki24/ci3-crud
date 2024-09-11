@@ -12,6 +12,11 @@ class Siswa_model extends CI_Model
         return $query->result();
     }
 
+    public function getById($id)
+    {
+        return $this->db->where('id',$id)->get('siswas')->row();
+    }
+
     public function insert($data, $table)
     {
         $this->db->insert($table, $data);
@@ -23,10 +28,9 @@ class Siswa_model extends CI_Model
         $this->db->update($table, $data);
     }
 
-    public function destroy($where, $table)
+    public function destroy($id)
     {
-        $this->db->where($where);
-        $this->db->delete($table);
+        return $this->db->delete('siswas' ,['id' => $id]);
     }
 
     public function get_students_per_class()

@@ -37,7 +37,17 @@ class Siswa extends CI_Controller
     $this->_rules();
 
     if ($this->form_validation->run() == FALSE) {
-      $this->create();
+      echo json_encode([
+        'status' => 'error',
+        'errors' => [
+          'error_name' => form_error('name'),
+          'error_nip' => form_error('nip'),
+          'error_jenis_kelamin' => form_error('jenis_kelamin'),
+          'error_alamat' => form_error('alamat'),
+          'error_tanggal_lahir' => form_error('tanggal_lahir'),
+          'error_id_kelas' => form_error('id_kelas')
+        ]
+      ]);
     } else {
       $data = array(
         'name' => $this->input->post('name'),
@@ -56,8 +66,16 @@ class Siswa extends CI_Controller
     <span aria-hidden="true">&times;</span>
   </button>
 </div>');
-redirect('siswa/index');
+
+      echo json_encode(['status' => 'success']);
     }
+  }
+
+  public function edit($id)
+  {
+    $siswa = $this->siswa_model->getById($id);
+
+    echo json_encode($siswa);
   }
 
   public function update($id)
@@ -65,7 +83,17 @@ redirect('siswa/index');
     $this->_rules();
 
     if ($this->form_validation->run() == FALSE) {
-      $this->index();
+      echo json_encode([
+        'status' => 'error',
+        'errors' => [
+          'error_name' => form_error('name'),
+          'error_nip' => form_error('nip'),
+          'error_jenis_kelamin' => form_error('jenis_kelamin'),
+          'error_alamat' => form_error('alamat'),
+          'error_tanggal_lahir' => form_error('tanggal_lahir'),
+          'error_id_kelas' => form_error('id_kelas')
+        ]
+      ]);
     } else {
       $data = array(
         'id' => $id,
@@ -85,7 +113,7 @@ redirect('siswa/index');
     <span aria-hidden="true">&times;</span>
   </button>
 </div>');
-redirect('siswa/index');
+      echo json_encode(['status' => 'success']);
     }
   }
 
@@ -94,26 +122,31 @@ redirect('siswa/index');
     $this->form_validation->set_rules('name', 'name', 'required', array(
       'required' => '%s harus diisi !!'
     ));
-    $this->form_validation->set_rules('nip', 'nip', 'required', array(
-      'required' => '%s harus diisi !!'
+    $this->form_validation->set_rules('nip', 'nip', 'required|is_unique[siswas.nip]', array(
+      'required' => '%s harus diisi !!',
+      'is_unique' => '%s sudah ada.'
     ));
     $this->form_validation->set_rules('jenis_kelamin', 'jenis kelamin', 'required', array(
+      'required' => '%s harus diisi !!'
+    ));
+    $this->form_validation->set_rules('id_kelas', 'kelas', 'required', array(
       'required' => '%s harus diisi !!'
     ));
   }
 
   public function destroy($id)
   {
-    $where = array('id' => $id);
-    $this->siswa_model->destroy($where, 'siswas');
-
+    if ($this->siswa_model->destroy($id)) {
       $this->session->set_flashdata('pesan', '<div class="alert alert-danger alert-dismissible fade show" role="alert">
   Data berhasil dihapus!
   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
     <span aria-hidden="true">&times;</span>
   </button>
 </div>');
-redirect('siswa/index');
+      echo json_encode(['status' => 'success']);
+    } else {
+      echo json_encode(['status' => 'error']);
+    }
   }
 }
 

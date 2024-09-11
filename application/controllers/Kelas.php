@@ -34,7 +34,13 @@ class Kelas extends CI_Controller
         $this->_rules();
 
         if ($this->form_validation->run() == FALSE) {
-            $this->create();
+            echo json_encode([
+                'status' => 'error',
+                'errors' => [
+                    'error_nama_kelas' => form_error('nama_kelas'),
+                    'error_wali_kelas' => form_error('wali_kelas'),
+                ]
+            ]);
         } else {
             $data = array(
                 'nama_kelas' => $this->input->post('nama_kelas'),
@@ -43,22 +49,38 @@ class Kelas extends CI_Controller
 
             $this->kelas_model->insert($data, 'kelass');
 
+
             $this->session->set_flashdata('pesan', '<div class="alert alert-success alert-dismissible fade show" role="alert">
-  Data berhasil ditambahkan!
-  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-    <span aria-hidden="true">&times;</span>
-  </button>
-</div>');
-            redirect('kelas/index');
+            Data berhasil ditambahkan!
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+            </div>');
+
+            echo json_encode(['status' => 'success']);
         }
     }
+
+    public function edit($id)
+    {
+        $kelas = $this->kelas_model->getById($id);
+
+        echo json_encode($kelas);
+    }
+
 
     public function update($id)
     {
         $this->_rules();
 
         if ($this->form_validation->run() == FALSE) {
-            $this->index();
+            echo json_encode([
+                'status' => 'error',
+                'errors' => [
+                    'error_nama_kelas' => form_error('nama_kelas'),
+                    'error_wali_kelas' => form_error('wali_kelas'),
+                ]
+            ]);
         } else {
             $data = array(
                 'id' => $id,
@@ -74,14 +96,15 @@ class Kelas extends CI_Controller
     <span aria-hidden="true">&times;</span>
   </button>
 </div>');
-            redirect('kelas/index');
+            echo json_encode(['status' => 'success']);
         }
     }
 
     public function _rules()
     {
-        $this->form_validation->set_rules('nama_kelas', 'nama_kelas', 'required', array(
-            'required' => '%s harus diisi !!'
+        $this->form_validation->set_rules('nama_kelas', 'nama_kelas', 'required|is_unique[kelass.nama_kelas]', array(
+            'required' => '%s harus diisi !!',
+            'is_unique' => '%s sudah ada.'
         ));
         $this->form_validation->set_rules('wali_kelas', 'wali_kelas', 'required', array(
             'required' => '%s harus diisi !!'
@@ -90,16 +113,17 @@ class Kelas extends CI_Controller
 
     public function destroy($id)
     {
-        $where = array('id' => $id);
-        $this->kelas_model->destroy($where, 'kelass');
-
-        $this->session->set_flashdata('pesan', '<div class="alert alert-danger alert-dismissible fade show" role="alert">
+        if ($this->kelas_model->destroy($id)) {
+            $this->session->set_flashdata('pesan', '<div class="alert alert-danger alert-dismissible fade show" role="alert">
   Data berhasil dihapus!
   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
     <span aria-hidden="true">&times;</span>
   </button>
 </div>');
-        redirect('kelas/index');
+            echo json_encode(['status' => 'success']);
+        } else {
+            echo json_encode(['status' => 'error']);
+        }
     }
 }
 

@@ -20,10 +20,14 @@ class Kelas_model extends CI_Model
         $this->db->update($table, $data);
     }
 
-    public function destroy($where, $table)
+    public function destroy($id)
     {
-        $this->db->where($where);
-        $this->db->delete($table);
+        return $this->db->delete('kelass', ['id' => $id]);
+    }
+
+    public function getById($id)
+    {
+        return $this->db->where('id', $id)->get('kelass')->row();
     }
 }
 
