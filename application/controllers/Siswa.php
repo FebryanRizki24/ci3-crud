@@ -22,6 +22,12 @@ class Siswa extends CI_Controller
     $this->load->view('templates/footer');
   }
 
+  public function getData()
+  {
+    $data = $this->siswa_model->getData();
+    echo json_encode($data);
+  }
+
   public function create()
   {
     $data['title'] = 'Tambah Siswa';

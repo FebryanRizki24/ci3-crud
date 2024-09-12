@@ -15,24 +15,12 @@
                     <th>Action</th>
                 </tr>
             </thead>
-            <?php
-            $no = 1;
-            foreach ($kelas as $k) : ?>
-                <tbody>
-                    <tr class="text-center">
-                        <td><?= $no++ ?></td>
-                        <td><?= $k->nama_kelas ?></td>
-                        <td><?= $k->wali_kelas ?></td>
-                        <td>
-                            <button data-id="<?= $k->id ?>" class="btn btn-warning btn-sm editKelasBtn"><i class="fas fa-edit"></i></button>
-                            <button data-id="<?= $k->id ?>" class="btn btn-danger btn-sm deleteKelasBtn"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                </tbody>
-            <?php endforeach ?>
+            <tbody id=tbody_kelas>
+            </tbody>
         </table>
     </div>
 </div>
+
 
 
 <!-- Modal Edit -->
@@ -47,15 +35,15 @@
             </div>
             <div class="modal-body">
                 <form id="editKelasForm">
-                    <input type="hidden" id="edit_id">
+                    <input type="hidden" id="id">
                     <div class="form-group">
-                        <label for="edit_nama_kelas">Nama Kelas:</label>
-                        <input type="text" id="edit_nama_kelas" name="nama_kelas" class="form-control">
+                        <label for="nama_kelas">Nama Kelas:</label>
+                        <input type="text" id="nama_kelas" name="nama_kelas" class="form-control">
                         <div class="text-small text-danger" id="error_nama_kelas"></div>
                     </div>
                     <div class="form-group">
-                        <label for="edit_wali_kelas">Wali Kelas:</label>
-                        <input type="text" id="edit_wali_kelas" name="wali_kelas" class="form-control">
+                        <label for="wali_kelas">Wali Kelas:</label>
+                        <input type="text" id="wali_kelas" name="wali_kelas" class="form-control">
                         <div class="text-small text-danger" id="error_wali_kelas"></div>
                     </div>
                     <div class="modal-footer">
@@ -68,6 +56,40 @@
 </div>
 
 <script>
+    $(document).ready(function() {
+        loadKelasData();
+
+        function loadKelasData() {
+            $.ajax({
+                url: '<?= base_url("kelas/getData") ?>',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    var kelasTableBody = '';
+                    var no = 1;
+
+                    $.each(response, function(index, kelas) {
+                        kelasTableBody += '<tr class="text-center">';
+                        kelasTableBody += '<td>' + no++ + '</td>';
+                        kelasTableBody += '<td>' + kelas.nama_kelas + '</td>';
+                        kelasTableBody += '<td>' + kelas.wali_kelas + '</td>';
+                        kelasTableBody += '<td>';
+                        kelasTableBody += '<button data-id="' + kelas.id + '" class="btn btn-warning btn-sm editKelasBtn"><i class="fas fa-edit"></i></button> ';
+                        kelasTableBody += '<button data-id="' + kelas.id + '" class="btn btn-danger btn-sm deleteKelasBtn"><i class="fas fa-trash"></i></button>';
+                        kelasTableBody += '</td>';
+                        kelasTableBody += '</tr>';
+                    });
+
+                    $('#tbody_kelas').html(kelasTableBody);
+                },
+                error: function(xhr, status, error) {
+                    alert('An error occurred. Please try again.');
+                    console.log(error);
+                }
+            });
+        }
+    });
+
     $(document).on('click', '.editKelasBtn', function() {
         var id = $(this).data('id');
 
@@ -76,9 +98,9 @@
             type: 'GET',
             dataType: 'json',
             success: function(data) {
-                $('#edit_id').val(data.id);
-                $('#edit_nama_kelas').val(data.nama_kelas);
-                $('#edit_wali_kelas').val(data.wali_kelas);
+                $('#id').val(data.id);
+                $('#nama_kelas').val(data.nama_kelas);
+                $('#wali_kelas').val(data.wali_kelas);
 
                 $('#editKelasModal').modal('show');
             }
@@ -88,7 +110,7 @@
     $('#editKelasForm').on('submit', function(e) {
         e.preventDefault();
 
-        var id = $('#edit_id').val();
+        var id = $('#id').val();
 
         $.ajax({
             url: '<?= base_url("kelas/update") ?>/' + id,
@@ -99,8 +121,8 @@
                 console.log(response.status)
                 if (response.status === 'success') {
                     window.location.href = "<?= base_url('kelas/index') ?>";
-                    $('#editKelasModal').modal('hide');
                     loadKelasData();
+                    $('#editKelasModal').modal('hide');
                 } else {
                     $('#error_nama_kelas').html(response.errors.error_nama_kelas);
                     $('#error_wali_kelas').html(response.errors.error_wali_kelas);
@@ -126,6 +148,7 @@
                 success: function(response) {
                     if (response.status === 'success') {
                         window.location.href = "<?= base_url('kelas/index') ?>";
+                        loadKelasData();
                     } else {
                         alert('Gagal menghapus data.');
                     }

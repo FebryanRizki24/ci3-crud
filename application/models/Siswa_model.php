@@ -5,7 +5,7 @@ class Siswa_model extends CI_Model
 {
     public function getData()
     {
-        $this->db->select('siswas.id, siswas.name, siswas.nip, siswas.jenis_kelamin, siswas.alamat, siswas.tanggal_lahir, kelass.nama_kelas');
+        $this->db->select('siswas.*, kelass.nama_kelas');
         $this->db->from('siswas');
         $this->db->join('kelass', 'siswas.id_kelas = kelass.id', 'left');
         $query = $this->db->get();

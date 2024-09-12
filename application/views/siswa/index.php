@@ -19,25 +19,8 @@
                     <th>Action</th>
                 </tr>
             </thead>
-            <?php
-            $no = 1;
-            foreach ($siswa as $s) : ?>
-                <tbody>
-                    <tr class="text-center">
-                        <td><?= $no++ ?></td>
-                        <td><?= $s->name ?></td>
-                        <td><?= $s->nip ?></td>
-                        <td><?= $s->jenis_kelamin ?></td>
-                        <td><?= $s->alamat ?></td>
-                        <td><?= $s->tanggal_lahir ?></td>
-                        <td><?= $s->nama_kelas ?></td>
-                        <td>
-                            <button data-id="<?= $s->id ?>" class="btn btn-warning btn-sm editSiswaBtn"><i class="fas fa-edit"></i></button>
-                            <button data-id="<?= $s->id ?>" class="btn btn-danger btn-sm deleteSiswaBtn"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                </tbody>
-            <?php endforeach ?>
+            <tbody id=tbody_siswa>
+            </tbody>
         </table>
     </div>
 </div>
@@ -63,7 +46,7 @@
 
                     <div class="form-group">
                         <label for="nip">NIP:</label>
-                        <input type="text" id="nip" name="nip" class="form-control" value="<?= $s->nip ?>">
+                        <input type="text" id="nip" name="nip" class="form-control">
                         <div class="text-small text-danger" id="error_nip"></div>
                     </div>
 
@@ -71,21 +54,21 @@
                         <label for="jenis_kelamin">Jenis Kelamin:</label>
                         <select id="jenis_kelamin" name="jenis_kelamin" class="form-control">
                             <option value="">Pilih Jenis Kelamin</option>
-                            <option value="Pria" <?= $s->jenis_kelamin == 'Pria' ? 'selected' : ''; ?>>Pria</option>
-                            <option value="Wanita" <?= $s->jenis_kelamin == 'Wanita' ? 'selected' : ''; ?>>Wanita</option>
+                            <option value="Pria" >Pria</option>
+                            <option value="Wanita">Wanita</option>
                         </select>
                         <div class="text-small text-danger" id="error_jenis_kelamin"></div>
                     </div>
 
                     <div class="form-group">
                         <label for="alamat">Alamat:</label>
-                        <textarea id="alamat" name="alamat" class="form-control" rows="4"><?= $s->alamat ?></textarea>
+                        <textarea id="alamat" name="alamat" class="form-control" rows="4"></textarea>
                         <div class="text-small text-danger" id="error_alamat"></div>
                     </div>
 
                     <div class="form-group">
                         <label for="tanggal_lahir">Tanggal Lahir:</label>
-                        <input type="date" id="tanggal_lahir" name="tanggal_lahir" class="form-control" value="<?= $s->tanggal_lahir ?>">
+                        <input type="date" id="tanggal_lahir" name="tanggal_lahir" class="form-control">
                         <div class="text-small text-danger" id="error_tanggal_lahir"></div>
                     </div>
 
@@ -110,6 +93,44 @@
 </div>
 
 <script>
+    $(document).ready(function() {
+        loadSiswaData();
+
+        function loadSiswaData() {
+            $.ajax({
+                url: '<?= base_url("siswa/getData") ?>',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    var siswaTableBody = '';
+                    var no = 1;
+
+                    $.each(response, function(index, siswa) {
+                        siswaTableBody += '<tr class="text-center">';
+                        siswaTableBody += '<td>' + no++ + '</td>';
+                        siswaTableBody += '<td>' + siswa.name + '</td>';
+                        siswaTableBody += '<td>' + siswa.nip + '</td>';
+                        siswaTableBody += '<td>' + siswa.jenis_kelamin + '</td>';
+                        siswaTableBody += '<td>' + siswa.alamat + '</td>';
+                        siswaTableBody += '<td>' + siswa.tanggal_lahir + '</td>';
+                        siswaTableBody += '<td>' + siswa.nama_kelas + '</td>';
+                        siswaTableBody += '<td>';
+                        siswaTableBody += '<button data-id="' + siswa.id + '" class="btn btn-warning btn-sm editSiswaBtn"><i class="fas fa-edit"></i></button> ';
+                        siswaTableBody += '<button data-id="' + siswa.id + '" class="btn btn-danger btn-sm deleteSiswaBtn"><i class="fas fa-trash"></i></button>';
+                        siswaTableBody += '</td>';
+                        siswaTableBody += '</tr>';
+                    });
+
+                    $('#tbody_siswa').html(siswaTableBody);
+                },
+                error: function(xhr, status, error) {
+                    alert('An error occurred. Please try again.');
+                    console.log(error);
+                }
+            });
+        }
+    });
+
     $(document).on('click', '.editSiswaBtn', function() {
         var id = $(this).data('id');
 
@@ -145,8 +166,8 @@
                 console.log(response.status)
                 if (response.status === 'success') {
                     window.location.href = "<?= base_url('siswa/index') ?>";
+                    loadSiswaData();
                     $('#editSiswaModal').modal('hide');
-                    loadKelasData();
                 } else {
                     $('#error_name').html(response.errors.error_name);
                     $('#error_nip').html(response.errors.error_nip);
@@ -177,6 +198,7 @@
                     console.log(response.status);
                     if (response.status === 'success') {
                         window.location.href = "<?= base_url('siswa/index') ?>";
+                        loadSiswaData();
                     } else {
                         alert('Gagal menghapus data.');
                     }

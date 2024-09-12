@@ -13,11 +13,17 @@ class Kelas extends CI_Controller
     public function index()
     {
         $data['title'] = 'Kelas';
-        $data['kelas'] = $this->kelas_model->getData();
+        // $data['kelas'] = $this->kelas_model->getData();
         $this->load->view('templates/header', $data);
         $this->load->view('templates/sidebar', $data);
         $this->load->view('kelas/index');
         $this->load->view('templates/footer');
+    }
+
+    public function getData()
+    {
+        $data = $this->kelas_model->getData();
+        echo json_encode($data);
     }
 
     public function create()
